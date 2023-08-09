@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <pic16f73.h>
+#include <pic.h>
+#include <xc.h>
+#include <stdint.h>
+
+char CheckSUM(int* mas, int length);
+
+__CONFIG(0x3FF9);
+__interrupt()
+
+int input_bytes[256] = {0};
+int counter_bytes = 0;
+int adr_transmitter = 0;
+int adr_receiver = 0;
+int length_message = 0;
+int CRC_sum = 0;
+int work_access = 0;
+int stop = 0;
+char crc = 0;
+char first_byte = 0;
+char shablon = 0;
+int flag_nach = 0;
+int last elem = 0;
+int four = 4;
+
+void __interrupt() ISR(void)
+{
+	if(RCIF == 1)
+   	{
+		input_bytes[counter_bytes] = RCREG;				
+		if(four > 0)
+		{
+		 counter_bytes++;
+		 four--;
+		}
+
+		 if(input_bytes[0] == 0x01 && input_bytes[1] == 0x02 && input_bytes[2] == 0x03 && input_bytes[3] == 0x04)
+			{	
+	 		 flag_nach = 1;
+			 shablon = 0x01 ^ 0x02 ^ 0x03 ^ 0x04;
+			}
+
+		if(flag_nach)
+		  counter_bytes++;
+
+		if(counter_bytes == (input_bytes[4] + 8))
+		{
+		   CRC_sum = CheckSUM(input_bytes, (input_bytes[4] + 8));
+		}
+		last elem = input_bytes[input_bytes[4] - 1];
+		if(CRC_sum == last_elem)
+		{
+		   work_access = 1;
+		   four = 4;
+		   flag_nach = 0;		   
+		}
+		else
+		   work_access = 0;
+		
+	}
+}
+
+char CheckSUM(int* mas, int len)
+{
+
+  for (int i = 4; i < len - 1; i++)
+      {	
+         shablon = mas[i] ^ shablon;
+      }
+	crc = shablon;
+      return crc;
+}
+
+int main(int argc, char** argv) 
+{
+	if(work_access == 1) 
+	{
+		//разрешаем выполнение программы
+	}
+  return 0;
+}
