@@ -1,10 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
 
 #include <pic16f73.h>
 #include <pic.h>
 #include <xc.h>
-#include <stdint.h>
+
 
 char CheckSUM(int* mas, int length);
 
@@ -13,14 +11,10 @@ __interrupt()
 
 int input_bytes[256] = {0};
 int counter_bytes = 0;
-int adr_transmitter = 0;
-int adr_receiver = 0;
 int length_message = 0;
 int CRC_sum = 0;
 int work_access = 0;
-int stop = 0;
 char crc = 0;
-char first_byte = 0;
 char shablon = 0;
 int flag_nach = 0;
 int last elem = 0;
