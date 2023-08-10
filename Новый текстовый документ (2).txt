@@ -1,10 +1,9 @@
-
 #include <pic16f73.h>
 #include <pic.h>
 #include <xc.h>
 
 
-char CheckSUM(int* mas, int length);
+int CheckSUM(int* mas, int length);
 
 __CONFIG(0x3FF9);
 __interrupt()
@@ -14,10 +13,10 @@ int counter_bytes = 0;
 int length_message = 0;
 int CRC_sum = 0;
 int work_access = 0;
-char crc = 0;
-char shablon = 0;
+int crc = 0;
+int shablon = 0;
 int flag_nach = 0;
-int last elem = 0;
+int last_elem = 0;
 int four = 4;
 
 void __interrupt() ISR(void)
@@ -44,12 +43,16 @@ void __interrupt() ISR(void)
 		{
 		   CRC_sum = CheckSUM(input_bytes, (input_bytes[4] + 8));
 		}
-		last elem = input_bytes[input_bytes[4] - 1];
+        if(input_bytes[input_bytes[4] - 1] != 0)
+        {
+            last_elem = input_bytes[input_bytes[4] - 1];
+        }
 		if(CRC_sum == last_elem)
 		{
 		   work_access = 1;
 		   four = 4;
-		   flag_nach = 0;		   
+		   flag_nach = 0;	
+           counter_bytes = 0;
 		}
 		else
 		   work_access = 0;
@@ -57,7 +60,7 @@ void __interrupt() ISR(void)
 	}
 }
 
-char CheckSUM(int* mas, int len)
+int CheckSUM(int* mas, int len)
 {
 
   for (int i = 4; i < len - 1; i++)
